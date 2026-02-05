@@ -117,8 +117,7 @@ git push -u origin main
 4. **Wait for Deployment** (2-3 minutes)
 
 5. **Test Live API**
-   - Your URL: `https://your-app.onrender.com`
-   - Test: `https://your-app.onrender.com/api/auth/register`
+   - Your URL: `https://expense-tracker-api-jfc9.onrender.com`
 
 ✅ **Your API is live!**
 

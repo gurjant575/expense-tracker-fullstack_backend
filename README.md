@@ -147,7 +147,7 @@ Project/
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/YOUR_USERNAME/expense-tracker-fullstack.git
+git clone https://github.com/gurjant575/expense-tracker-fullstack_backend.git
 cd expense-tracker-fullstack/backend
 ```
 
@@ -280,9 +280,9 @@ curl -X POST http://localhost:5000/api/categories \
 
 ### Deployed URLs
 
-- **API**: `https://expense-tracker-api.onrender.com`
+- **API**: `https://expense-tracker-api-jfc9.onrender.com`
 - **Database**: PostgreSQL on Render
-- **Repository**: `https://github.com/YOUR_USERNAME/expense-tracker-fullstack`
+- **Repository**: `https://github.com/gurjant575/expense-tracker-fullstack_backend`
 
 ### Deployment Steps
 

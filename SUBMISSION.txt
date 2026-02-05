@@ -17,11 +17,11 @@ Project Name: Personal Expense & Budget Tracker
 
 GitHub Repository:
 ------------------
-https://github.com/YOUR_USERNAME/expense-tracker-fullstack
+https://github.com/gurjant575/expense-tracker-fullstack_backend
 
 Live API URL (Render):
 ----------------------
-https://expense-tracker-api.onrender.com
+https://expense-tracker-api-jfc9.onrender.com
 
 Database:
 ---------
