@@ -245,7 +245,7 @@ In the Render dashboard for your web service, add:
 
 Click "Create Web Service" and Render will automatically deploy your API!
 
-Your API will be live at: `https://expense-tracker-api.onrender.com`
+Your API will be live at: `https://expense-tracker-api-jfc9.onrender.com`
 
 ## 🔒 Authentication
 
