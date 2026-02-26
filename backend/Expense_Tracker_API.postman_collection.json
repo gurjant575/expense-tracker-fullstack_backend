@@ -1,0 +1,701 @@
+{
+  "info": {
+    "_postman_id": "expense-tracker-api-collection",
+    "name": "Expense Tracker API - Gurjant Singh",
+    "description": "Complete API collection for the Personal Expense & Budget Tracker.\n\nBase URL: https://expense-tracker-api-jfc9.onrender.com\n\nWorkflow:\n1. Run 'Register User' or 'Login User'\n2. Copy the token from the response\n3. The collection uses {{token}} variable - set it in your Environment, or paste it manually in each request's Authorization header.\n\nAll endpoints except Register and Login require:\n  Authorization: Bearer {{token}}",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://expense-tracker-api-jfc9.onrender.com",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new user. Returns a JWT token on success.\n\nExpected Status: 201 Created\n\nNOTE: Passwords are hashed with bcrypt before storage. Plain-text passwords are never saved."
+          },
+          "response": [
+            {
+              "name": "201 - Created",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"User registered successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"John Doe\",\n      \"email\": \"john@example.com\"\n    },\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.data.token);",
+                  "    console.log('Token saved:', response.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with existing credentials. The Tests script automatically saves the JWT token to the {{token}} collection variable.\n\nExpected Status: 200 OK"
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"John Doe\",\n      \"email\": \"john@example.com\"\n    },\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n  }\n}"
+            },
+            {
+              "name": "401 - Unauthorized (wrong credentials)",
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid credentials\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Get the currently authenticated user's profile.\n\nExpected Status: 200 OK\n\nRequires: Authorization: Bearer {{token}}"
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"John Doe\",\n      \"email\": \"john@example.com\",\n      \"created_at\": \"2026-02-05T10:00:00.000Z\",\n      \"updated_at\": \"2026-02-05T10:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "401 - Unauthorized (no token)",
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"No token provided. Authorization denied.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"john.updated@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Update the authenticated user's name and email.\n\nExpected Status: 200 OK\n\nRequires: Authorization: Bearer {{token}}"
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Profile updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"John Updated\",\n      \"email\": \"john.updated@example.com\",\n      \"updated_at\": \"2026-02-26T10:00:00.000Z\"\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories"]
+            },
+            "description": "Get all categories belonging to the authenticated user.\n\nExpected Status: 200 OK\n\nRequires: Authorization: Bearer {{token}}"
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"count\": 3,\n  \"data\": {\n    \"categories\": [\n      {\n        \"id\": 1,\n        \"name\": \"Food\",\n        \"user_id\": 1,\n        \"color\": \"#FF6B6B\",\n        \"created_at\": \"2026-02-05T10:00:00.000Z\",\n        \"updated_at\": \"2026-02-05T10:00:00.000Z\"\n      },\n      {\n        \"id\": 2,\n        \"name\": \"Transport\",\n        \"user_id\": 1,\n        \"color\": \"#4ECDC4\",\n        \"created_at\": \"2026-02-05T10:05:00.000Z\",\n        \"updated_at\": \"2026-02-05T10:05:00.000Z\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Single Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/categories/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "1"]
+            },
+            "description": "Get a single category by its ID. Only returns the category if it belongs to the authenticated user.\n\nExpected Status: 200 OK (found) or 404 Not Found\n\nRequires: Authorization: Bearer {{token}}"
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"category\": {\n      \"id\": 1,\n      \"name\": \"Food\",\n      \"user_id\": 1,\n      \"color\": \"#FF6B6B\",\n      \"created_at\": \"2026-02-05T10:00:00.000Z\",\n      \"updated_at\": \"2026-02-05T10:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "404 - Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Category not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Food\",\n  \"color\": \"#FF6B6B\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories"]
+            },
+            "description": "Create a new expense category for the authenticated user.\n\nExpected Status: 201 Created\n\nRequires: Authorization: Bearer {{token}}\n\nFields:\n- name (required): Category name\n- color (optional): Hex color code (e.g. #FF6B6B). Defaults to #3B82F6"
+          },
+          "response": [
+            {
+              "name": "201 - Created",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Category created successfully\",\n  \"data\": {\n    \"category\": {\n      \"id\": 1,\n      \"name\": \"Food\",\n      \"user_id\": 1,\n      \"color\": \"#FF6B6B\",\n      \"created_at\": \"2026-02-05T10:00:00.000Z\",\n      \"updated_at\": \"2026-02-05T10:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "400 - Bad Request (validation error)",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"errors\": [\n    {\n      \"msg\": \"Category name is required\",\n      \"param\": \"name\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Groceries\",\n  \"color\": \"#FF8888\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/categories/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "1"]
+            },
+            "description": "Update a category's name and/or color by its ID.\n\nExpected Status: 200 OK\n\nRequires: Authorization: Bearer {{token}}\n\nReplace '1' in the URL with the actual category ID."
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Category updated successfully\",\n  \"data\": {\n    \"category\": {\n      \"id\": 1,\n      \"name\": \"Groceries\",\n      \"user_id\": 1,\n      \"color\": \"#FF8888\",\n      \"created_at\": \"2026-02-05T10:00:00.000Z\",\n      \"updated_at\": \"2026-02-26T12:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "404 - Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Category not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/categories/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "1"]
+            },
+            "description": "Delete a category by its ID. All expenses under this category are also deleted (CASCADE).\n\nExpected Status: 200 OK\n\nRequires: Authorization: Bearer {{token}}\n\nReplace '1' in the URL with the actual category ID."
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Category deleted successfully\",\n  \"data\": {\n    \"id\": 1\n  }\n}"
+            },
+            {
+              "name": "404 - Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Category not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Expenses",
+      "item": [
+        {
+          "name": "Get All Expenses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/expenses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "expenses"],
+              "query": [
+                {
+                  "key": "category_id",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Filter by category ID (optional)"
+                },
+                {
+                  "key": "start_date",
+                  "value": "2026-02-01",
+                  "disabled": true,
+                  "description": "Filter from date YYYY-MM-DD (optional)"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2026-02-28",
+                  "disabled": true,
+                  "description": "Filter to date YYYY-MM-DD (optional)"
+                }
+              ]
+            },
+            "description": "Get all expenses for the authenticated user. Supports optional filters:\n- category_id: filter by category\n- start_date / end_date: filter by date range (YYYY-MM-DD)\n\nExpected Status: 200 OK\n\nRequires: Authorization: Bearer {{token}}"
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"count\": 3,\n  \"data\": {\n    \"expenses\": [\n      {\n        \"id\": 1,\n        \"amount\": \"45.50\",\n        \"description\": \"Grocery shopping\",\n        \"date\": \"2026-02-05\",\n        \"category_id\": 1,\n        \"user_id\": 1,\n        \"category_name\": \"Food\",\n        \"category_color\": \"#FF6B6B\",\n        \"created_at\": \"2026-02-05T10:00:00.000Z\",\n        \"updated_at\": \"2026-02-05T10:00:00.000Z\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Single Expense by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/expenses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "expenses", "1"]
+            },
+            "description": "Get a single expense by its ID. Only returns the expense if it belongs to the authenticated user.\n\nExpected Status: 200 OK (found) or 404 Not Found\n\nRequires: Authorization: Bearer {{token}}"
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"expense\": {\n      \"id\": 1,\n      \"amount\": \"45.50\",\n      \"description\": \"Grocery shopping\",\n      \"date\": \"2026-02-05\",\n      \"category_id\": 1,\n      \"user_id\": 1,\n      \"category_name\": \"Food\",\n      \"category_color\": \"#FF6B6B\",\n      \"created_at\": \"2026-02-05T10:00:00.000Z\",\n      \"updated_at\": \"2026-02-05T10:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "404 - Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Expense not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Expense",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 45.50,\n  \"description\": \"Grocery shopping at Walmart\",\n  \"date\": \"2026-02-05\",\n  \"category_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/expenses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "expenses"]
+            },
+            "description": "Create a new expense record.\n\nExpected Status: 201 Created\n\nRequires: Authorization: Bearer {{token}}\n\nFields:\n- amount (required): Positive decimal number\n- date (required): Date in YYYY-MM-DD format\n- category_id (required): Must be an existing category ID owned by the user\n- description (optional): Text description"
+          },
+          "response": [
+            {
+              "name": "201 - Created",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Expense created successfully\",\n  \"data\": {\n    \"expense\": {\n      \"id\": 1,\n      \"amount\": \"45.50\",\n      \"description\": \"Grocery shopping at Walmart\",\n      \"date\": \"2026-02-05\",\n      \"category_id\": 1,\n      \"user_id\": 1,\n      \"category_name\": \"Food\",\n      \"category_color\": \"#FF6B6B\",\n      \"created_at\": \"2026-02-05T10:00:00.000Z\",\n      \"updated_at\": \"2026-02-05T10:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "400 - Bad Request (validation error)",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"errors\": [\n    {\n      \"msg\": \"Amount must be a positive number\",\n      \"param\": \"amount\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Expense",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50.00,\n  \"description\": \"Updated grocery shopping\",\n  \"date\": \"2026-02-05\",\n  \"category_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/expenses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "expenses", "1"]
+            },
+            "description": "Update an existing expense by its ID.\n\nExpected Status: 200 OK\n\nRequires: Authorization: Bearer {{token}}\n\nReplace '1' in the URL with the actual expense ID."
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Expense updated successfully\",\n  \"data\": {\n    \"expense\": {\n      \"id\": 1,\n      \"amount\": \"50.00\",\n      \"description\": \"Updated grocery shopping\",\n      \"date\": \"2026-02-05\",\n      \"category_id\": 1,\n      \"user_id\": 1,\n      \"category_name\": \"Food\",\n      \"category_color\": \"#FF6B6B\",\n      \"created_at\": \"2026-02-05T10:00:00.000Z\",\n      \"updated_at\": \"2026-02-26T12:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "404 - Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Expense not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Expense",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/expenses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "expenses", "1"]
+            },
+            "description": "Delete an expense by its ID.\n\nExpected Status: 200 OK\n\nRequires: Authorization: Bearer {{token}}\n\nReplace '1' in the URL with the actual expense ID."
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Expense deleted successfully\",\n  \"data\": {\n    \"id\": 1\n  }\n}"
+            },
+            {
+              "name": "404 - Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Expense not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Monthly Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/expenses/summary/monthly?year=2026&month=2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "expenses", "summary", "monthly"],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026",
+                  "description": "Required. The year (e.g. 2026)"
+                },
+                {
+                  "key": "month",
+                  "value": "2",
+                  "description": "Required. The month number 1-12"
+                }
+              ]
+            },
+            "description": "Get a monthly spending summary grouped by category.\n\nExpected Status: 200 OK\n\nRequires: Authorization: Bearer {{token}}\n\nQuery params year and month are both required."
+          },
+          "response": [
+            {
+              "name": "200 - OK",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"summary\": [\n      {\n        \"category_name\": \"Utilities\",\n        \"category_color\": \"#FFA07A\",\n        \"total\": \"85.00\",\n        \"count\": \"1\"\n      },\n      {\n        \"category_name\": \"Food\",\n        \"category_color\": \"#FF6B6B\",\n        \"total\": \"45.50\",\n        \"count\": \"1\"\n      }\n    ],\n    \"total\": 200.50,\n    \"year\": 2026,\n    \"month\": 2\n  }\n}"
+            },
+            {
+              "name": "400 - Bad Request (missing params)",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Year and month are required\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
