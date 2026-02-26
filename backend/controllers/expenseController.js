@@ -216,9 +216,10 @@ exports.getMonthlySummary = async (req, res) => {
     }
 
     const summary = await Expense.getMonthlySummary(req.user.id, year, month);
+    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
     const total = await Expense.getTotal(req.user.id, {
       start_date: `${year}-${month.padStart(2, '0')}-01`,
-      end_date: `${year}-${month.padStart(2, '0')}-31`
+      end_date: `${year}-${month.padStart(2, '0')}-${lastDay}`
     });
 
     res.json({
