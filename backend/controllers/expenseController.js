@@ -2,7 +2,6 @@ const { body, validationResult, query } = require('express-validator');
 const Expense = require('../models/Expense');
 const Category = require('../models/Category');
 
-// Validation rules
 exports.expenseValidation = [
   body('amount').isFloat({ min: 0.01 }).withMessage('Amount must be a positive number'),
   body('description').optional().trim(),
@@ -10,9 +9,6 @@ exports.expenseValidation = [
   body('category_id').isInt().withMessage('Valid category ID is required')
 ];
 
-// @desc    Get all expenses for logged-in user
-// @route   GET /api/expenses
-// @access  Private
 exports.getExpenses = async (req, res) => {
   try {
     const { category_id, start_date, end_date } = req.query;
@@ -30,7 +26,6 @@ exports.getExpenses = async (req, res) => {
       data: { expenses }
     });
   } catch (error) {
-    console.error('Get expenses error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error fetching expenses'
@@ -38,9 +33,6 @@ exports.getExpenses = async (req, res) => {
   }
 };
 
-// @desc    Get single expense
-// @route   GET /api/expenses/:id
-// @access  Private
 exports.getExpense = async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id, req.user.id);
@@ -57,7 +49,6 @@ exports.getExpense = async (req, res) => {
       data: { expense }
     });
   } catch (error) {
-    console.error('Get expense error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error fetching expense'
@@ -65,12 +56,8 @@ exports.getExpense = async (req, res) => {
   }
 };
 
-// @desc    Create new expense
-// @route   POST /api/expenses
-// @access  Private
 exports.createExpense = async (req, res) => {
   try {
-    // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -81,7 +68,6 @@ exports.createExpense = async (req, res) => {
 
     const { amount, description, date, category_id } = req.body;
 
-    // Verify category belongs to user
     const category = await Category.findById(category_id, req.user.id);
     if (!category) {
       return res.status(400).json({
@@ -98,7 +84,6 @@ exports.createExpense = async (req, res) => {
       user_id: req.user.id
     });
 
-    // Fetch the complete expense with category details
     const completeExpense = await Expense.findById(expense.id, req.user.id);
 
     res.status(201).json({
@@ -107,7 +92,6 @@ exports.createExpense = async (req, res) => {
       data: { expense: completeExpense }
     });
   } catch (error) {
-    console.error('Create expense error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error creating expense'
@@ -115,12 +99,8 @@ exports.createExpense = async (req, res) => {
   }
 };
 
-// @desc    Update expense
-// @route   PUT /api/expenses/:id
-// @access  Private
 exports.updateExpense = async (req, res) => {
   try {
-    // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -131,7 +111,6 @@ exports.updateExpense = async (req, res) => {
 
     const { amount, description, date, category_id } = req.body;
 
-    // Check if expense exists
     const existingExpense = await Expense.findById(req.params.id, req.user.id);
     if (!existingExpense) {
       return res.status(404).json({
@@ -140,7 +119,6 @@ exports.updateExpense = async (req, res) => {
       });
     }
 
-    // Verify category belongs to user
     const category = await Category.findById(category_id, req.user.id);
     if (!category) {
       return res.status(400).json({
@@ -156,7 +134,6 @@ exports.updateExpense = async (req, res) => {
       category_id
     });
 
-    // Fetch the complete expense with category details
     const completeExpense = await Expense.findById(expense.id, req.user.id);
 
     res.json({
@@ -165,7 +142,6 @@ exports.updateExpense = async (req, res) => {
       data: { expense: completeExpense }
     });
   } catch (error) {
-    console.error('Update expense error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error updating expense'
@@ -173,9 +149,6 @@ exports.updateExpense = async (req, res) => {
   }
 };
 
-// @desc    Delete expense
-// @route   DELETE /api/expenses/:id
-// @access  Private
 exports.deleteExpense = async (req, res) => {
   try {
     const expense = await Expense.delete(req.params.id, req.user.id);
@@ -193,7 +166,6 @@ exports.deleteExpense = async (req, res) => {
       data: { id: expense.id }
     });
   } catch (error) {
-    console.error('Delete expense error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error deleting expense'
@@ -201,9 +173,6 @@ exports.deleteExpense = async (req, res) => {
   }
 };
 
-// @desc    Get monthly summary
-// @route   GET /api/expenses/summary/monthly
-// @access  Private
 exports.getMonthlySummary = async (req, res) => {
   try {
     const { year, month } = req.query;
@@ -232,7 +201,6 @@ exports.getMonthlySummary = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get monthly summary error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error fetching monthly summary'

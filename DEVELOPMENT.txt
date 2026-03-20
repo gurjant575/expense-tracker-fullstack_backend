@@ -1,0 +1,5 @@
+Expense Tracker - Development Notes
+
+Date: May 22, 2026
+
+- Database authentication implemented
