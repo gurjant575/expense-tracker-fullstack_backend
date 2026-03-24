@@ -6,3 +6,5 @@ Date: May 22, 2026
 Expense Tracker - Development Notes
 
 Date: Mar 22, 2026
+
+- Database authentication implemented
