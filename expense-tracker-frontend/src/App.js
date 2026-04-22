@@ -1,81 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Register from './components/Register';
+import Dashboard from './pages/Dashboard';
 import ExpenseList from './components/ExpenseList';
 import CategoryList from './components/CategoryList';
+import NotFound from './pages/NotFound';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
-const AppContent = () => {
-  const { isAuthenticated, user, logout, loading } = useAuth();
-  const [currentView, setCurrentView] = useState('expenses');
-  const [showLogin, setShowLogin] = useState(true);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      setCurrentView('expenses');
-    }
-  }, [isAuthenticated]);
+/* Inner component so it can read AuthContext for conditional rendering */
+const AppRoutes = () => {
+  const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="loading-page">
-        <div className="spinner"></div>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="auth-page">
-        {showLogin ? (
-          <Login onSwitchToRegister={() => setShowLogin(false)} />
-        ) : (
-          <Register onSwitchToLogin={() => setShowLogin(true)} />
-        )}
+        <div className="spinner-ring"></div>
+        <p>Loading SpendSmart…</p>
       </div>
     );
   }
 
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <div className="header-content">
-          <h1>Expense Tracker</h1>
-          <div className="header-user">
-            <span>Welcome, {user?.name || user?.email}!</span>
-            <button onClick={logout} className="btn-logout">Logout</button>
-          </div>
-        </div>
-      </header>
+    <div className="app-wrapper">
+      {isAuthenticated && <Navbar />}
+      <main className={isAuthenticated ? 'main-content' : ''}>
+        <Routes>
+          {/* Public routes – redirect to dashboard when already logged in */}
+          <Route path="/login"    element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+          <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
 
-      <nav className="app-nav">
-        <button className={`nav-btn ${currentView === 'expenses' ? 'active' : ''}`} onClick={() => setCurrentView('expenses')}>
-          Expenses
-        </button>
-        <button className={`nav-btn ${currentView === 'categories' ? 'active' : ''}`} onClick={() => setCurrentView('categories')}>
-          Categories
-        </button>
-      </nav>
+          {/* Protected routes */}
+          <Route path="/dashboard"  element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/expenses"   element={<ProtectedRoute><ExpenseList /></ProtectedRoute>} />
+          <Route path="/categories" element={<ProtectedRoute><CategoryList /></ProtectedRoute>} />
 
-      <main className="app-main">
-        {currentView === 'expenses' && <ExpenseList />}
-        {currentView === 'categories' && <CategoryList />}
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+
+          {/* 404 catch-all */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </main>
-
-      <footer className="app-footer">
-        <p>Expense Tracker 2024</p>
-      </footer>
     </div>
   );
 };
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
